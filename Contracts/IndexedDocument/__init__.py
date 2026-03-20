@@ -1,0 +1,1 @@
+from .IndexedDocument import IndexedDocument

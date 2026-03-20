@@ -2,7 +2,10 @@
 __pycache__/
 *.py[codz]
 *$py.class
-
+# Folders starting with .
+.*/
+# Skills lock
+skills-lock.json
 # C extensions
 *.so
 

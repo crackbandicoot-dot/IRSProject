@@ -1,9 +1,6 @@
 # Instantiate any underlying parser/tokenizer classes here at module level if needed
-
-def parse(raw_query):
-    return {
-        'terms': raw_query.split(),
-        'operators': ['AND'],
-        'filters': [],
-        'original': raw_query
-    }
+from .QueryParser import QueryParser
+from Contracts.QueryNodes import QueryNode
+def parse(raw_query: str) -> QueryNode:
+    parser = QueryParser(raw_query)
+    return parser.parse()

@@ -1,8 +1,8 @@
-# Instantiate any underlying index/storage classes here at module level if needed
+from .IndexHanlder import IndexHandler
+from Contracts.IndexedDocument import IndexedDocument
+from typing import List
 
-def get_relevant_indexes(query):
-    return [
-        'documents/legal/tax_code.idx',
-        'documents/forms/1040.idx', 
-        'documents/publications/pub17.idx'
-    ]
+_instance = IndexHandler()
+
+def get_relevant_indexes(raw_query: str) -> List[IndexedDocument]:
+    return _instance.get_relevant_indexes(raw_query)
