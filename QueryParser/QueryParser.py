@@ -1,15 +1,19 @@
 from Contracts.QueryNodes import AndNode,TermNode, HedgeNode,QueryNode,OrNode,NotNode
+from Errors.QueryError.query_error import QueryError
 
 class QueryParser:
     
     def __init__(self, raw_query: str) -> None:
+        self.current = ""
         self.index = -1
-        self.query_tokens = raw_query.split()
+        self.query_tokens = raw_query.replace("("," ( ").replace(")"," ) ").split()
         self._next()
-        
     def parse(self) -> QueryNode:
-        return self._or()
-
+        query_node= self._or()
+        if self.current!="\0":
+            raise QueryError(self.index+1, "Can't parse query unexpected end of query. Hint: between basic terms such as lower case words or parenthesized expressions it should be an AND/OR operator")
+        return query_node
+             
     def _or(self)->QueryNode:
         left = self._and()
         while self.current=="OR":
@@ -38,25 +42,30 @@ class QueryParser:
         return self._primary()
     
     def _primary(self) -> QueryNode:
-        
         if self.current == "\0":
-            raise RuntimeError(f"Unexpected end of query on column {self.index+1}")
+            raise QueryError(self.index+1, "Unexpected end of query")
         if self.current.islower():
             term = self.current
             self._next()
             return TermNode(term)
         if self.current =="(": # Grouping expressions
             self._next()
-            query_exp = self._and()
+            query_exp = self._or()
             if self.current == ")":
+                self._next()
                 return query_exp
-            raise RuntimeError(f"Invalid query, expected ')' on column {self.index+1}")
-        raise RuntimeError(f"Unexpected query token on column {self.index+1}")
+            raise QueryError(self.index+1, 'Expected ")"')
+
+        raise QueryError(self.index+1, f'Word "{self.current}" is invalid')
+    
     def _next(self) -> None:
-        if self.index >= len(self.query_tokens)-1:
-            self.current="\0"
-            return
+        token = self._peek(1)
         self.index+=1
-        self.current = self.query_tokens[self.index]
+        self.current = token
+
+    def _peek(self,offset:int):
+        if self.index+offset>len(self.query_tokens)-1:
+            return "\0"
+        return self.query_tokens[self.index+offset]
     
     

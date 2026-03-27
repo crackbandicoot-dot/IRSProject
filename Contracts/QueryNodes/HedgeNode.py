@@ -3,7 +3,7 @@ from .QueryNode import QueryNode
 class HedgeNode(QueryNode):
     @property
     def hedge_keyword(self)-> str:  
-        return self._hedge_kewyword
+        return self._hedge_keyword
     @property
     def child(self)-> QueryNode:
         return self._child
