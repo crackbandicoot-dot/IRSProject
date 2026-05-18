@@ -11,7 +11,9 @@ class QueryParser:
     def parse(self) -> QueryNode:
         query_node= self._or()
         if self.current!="\0":
-            raise QueryError(self.index+1, "Can't parse query unexpected end of query. Hint: between basic terms such as lower case words or parenthesized expressions it should be an AND/OR operator")
+            raise QueryError(self.index+1, "Can't parse query unexpected end of query. " \
+            "Hint: between basic terms such as lower case words or parenthesized expressions " \
+            "it should be an AND/OR operator")
         return query_node
              
     def _or(self)->QueryNode:
@@ -63,7 +65,7 @@ class QueryParser:
         self.index+=1
         self.current = token
 
-    def _peek(self,offset:int):
+    def _peek(self,offset:int) -> str:
         if self.index+offset>len(self.query_tokens)-1:
             return "\0"
         return self.query_tokens[self.index+offset]

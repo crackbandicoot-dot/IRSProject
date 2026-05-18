@@ -6,42 +6,7 @@ import tkinter as tk
 from typing import List
 
 from Contracts.RichResult import RichResult
-
-
-_HELP_TEXT = """
-QUERY LANGUAGE HELP
-
-BASIC TERMS
-  - Lowercase words are search terms
-  - Example: tax, deduction, income
-
-OPERATORS
-  AND   - Both terms must be present
-          Example: tax AND deduction
-
-  OR    - Either term can be present
-          Example: tax OR income
-
-  NOT   - Exclude the following term
-          Example: tax NOT penalty
-
-HEDGE KEYWORDS
-  - Uppercase words (VERY, FAIRLY, SOMEWHAT, SLIGHTLY, etc.)
-  - Modify the importance/certainty of the following term
-  - Example: VERY tax (strongly emphasize "tax")
-
-GROUPING
-  - Use parentheses to control evaluation order
-  - Example: (tax OR income) AND deduction
-
-EXAMPLES
-  tax AND deduction
-  VERY income OR fairly expense
-  NOT (penalty AND fine)
-  tax AND (deduction OR exemption)
-
-Type /help to see this message again.
-""".strip()
+from GUI.gui_utils import HELP_TEXT, render_results
 
 
 class GUI:
@@ -91,7 +56,7 @@ class GUI:
         self._query_entry.focus_set()
         self._root.mainloop()
 
-    def _on_submit(self, _event=None) -> None:
+    def _on_submit(self, _event: tk.Event | None = None) -> None:
         user_prompt = self._query_var.get()
         self._query_var.set("")
 
@@ -106,7 +71,7 @@ class GUI:
 
     def _show_help(self) -> None:
         self._output.delete("1.0", tk.END)
-        self._output.insert(tk.END, _HELP_TEXT + "\n")
+        self._output.insert(tk.END, HELP_TEXT + "\n")
 
     def _poll_results(self) -> None:
         got_any = False
@@ -128,11 +93,4 @@ class GUI:
         self._root.after(100, self._poll_results)
 
     def _render_results(self, search_results: List[RichResult]) -> None:
-        self._output.delete("1.0", tk.END)
-        self._output.insert(tk.END, "=== SEARCH RESULTS ===\n")
-
-        for result in search_results:
-            self._output.insert(tk.END, f"Title: {result['title']}\n")
-            self._output.insert(tk.END, f"Snippet: {result['snippet']}...\n")
-            self._output.insert(tk.END, f"Score: {result['score']:.4f}\n")
-            self._output.insert(tk.END, "-" * 40 + "\n")
+        render_results(self._output, search_results)

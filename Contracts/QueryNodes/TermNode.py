@@ -6,7 +6,7 @@ class TermNode(QueryNode):
     def term(self)->str:
         return self._term
     
-    def  __init__(self,term:str):
+    def  __init__(self,term:str) -> None:
         self._term = term
         
     

@@ -13,11 +13,10 @@ class ResultsEnricher:
         for result in raw_search_results:
             doc = self._documents.find_one({"_id": result.document_id})
             if doc:
-                rich_result = {
-                    "title": doc["title"],
-                    "snippet": doc["content"][:150],
-                    "score": result.score,
-                }
-                rich_results.append(rich_result)
+                rich_results.append(RichResult(
+                    title=doc.get("title", ""),
+                    snippet=doc.get("content", "")[:150],
+                    score=result.score
+                ))
         return rich_results
      

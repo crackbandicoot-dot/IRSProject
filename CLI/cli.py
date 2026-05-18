@@ -1,8 +1,7 @@
 from Contracts.RichResult import RichResult
 from typing import List
 
-def _show_help() -> None:
-    help_text = """
+HELP_TEXT = """
 ╔════════════════════════════════════════════════════════════════════╗
 ║                      QUERY LANGUAGE HELP                          ║
 ╚════════════════════════════════════════════════════════════════════╝
@@ -37,7 +36,9 @@ EXAMPLES
   tax AND (deduction OR exemption)
 ════════════════════════════════════════════════════════════════════
 """
-    print(help_text)
+
+def _show_help() -> None:
+    print(HELP_TEXT)
 
 def show_result(search_results: List[RichResult]) -> None:
     print("\n=== SEARCH RESULTS ===")
