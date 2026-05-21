@@ -1,5 +1,5 @@
 import pytest
-from web_crawler.web_crawler import crawl_tourism_sites
+from web_crawler.web_crawler import crawl
 from contracts.crawled_page.crawled_page import CrawledPage
 
 def test_integration_crawl_tourism_sites() -> None:
@@ -8,7 +8,7 @@ def test_integration_crawl_tourism_sites() -> None:
     seed_urls = ["https://en.wikipedia.org/wiki/Tourism"]
     max_pages = 2
     
-    pages = crawl_tourism_sites(seed_urls, max_pages=max_pages)
+    pages = crawl(seed_urls, max_pages=max_pages)
     
     # Verify we got some pages crawled
     assert len(pages) > 0
@@ -28,7 +28,7 @@ def test_integration_crawls_multiple_pages() -> None:
     seed_urls = ["https://en.wikipedia.org/wiki/Tourism"]
     max_pages = 5
     
-    pages = crawl_tourism_sites(seed_urls, max_pages=max_pages)
+    pages = crawl(seed_urls, max_pages=max_pages)
     
     # Verify it actually followed links and generated the max number of pages requested
     assert len(pages) == max_pages, f"Crawler should have found {max_pages} pages"

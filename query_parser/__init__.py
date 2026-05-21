@@ -1,1 +1,1 @@
-from .query_parser_impl import QueryParser    
+from .query_parser import parse

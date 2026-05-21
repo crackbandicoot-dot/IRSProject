@@ -1,1 +1,1 @@
-from results_enricher import results_enricher
+from .results_enricher import enrich

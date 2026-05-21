@@ -1,0 +1,1 @@
+from .gui_ui import wait_query,show_result

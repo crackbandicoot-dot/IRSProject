@@ -1,8 +1,4 @@
-from gui import gui_ui as ui
-from query_parser import query_parser 
-from index_repository import index_repository
-import search_engine
-from results_enricher import results_enricher
+import gui as ui, query_parser,index_repository,search_engine,results_enricher
 
 while True:
     raw_query = ui.wait_query()
