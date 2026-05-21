@@ -1,6 +1,6 @@
 import pytest
-from WebCrawler.web_crawler import crawl_tourism_sites
-from Contracts.CrawledPage.CrawledPage import CrawledPage
+from web_crawler.web_crawler import crawl_tourism_sites
+from contracts.crawled_page.crawled_page import CrawledPage
 
 def test_integration_crawl_tourism_sites() -> None:
     # We use a highly available URL related to tourism for the integration test.

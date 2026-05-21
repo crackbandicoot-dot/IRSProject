@@ -3,7 +3,7 @@ from __future__ import annotations
 import tkinter as tk
 from typing import List
 
-from Contracts.RichResult import RichResult
+from contracts.rich_result.rich_result import RichResult
 
 
 HELP_TEXT = """

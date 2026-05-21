@@ -5,8 +5,9 @@ import threading
 import tkinter as tk
 from typing import List
 
-from Contracts.RichResult import RichResult
-from GUI.gui_utils import HELP_TEXT, render_results
+
+from contracts.rich_result.rich_result import RichResult
+from .gui_utils import HELP_TEXT, render_results
 
 
 class GUI:

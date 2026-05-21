@@ -1,8 +1,8 @@
 import pytest
 
-from QueryParser import query_parser
-from Contracts.QueryNodes import AndNode, HedgeNode, NotNode, OrNode, TermNode
-from Errors.QueryError.query_error import QueryError
+from query_parser import query_parser
+from contracts.query_nodes import AndNode, HedgeNode, NotNode, OrNode, TermNode
+from contracts.errors import QueryError
 
 def assert_is_term(node: TermNode, expected_term: str) -> None:
     assert isinstance(node, TermNode)

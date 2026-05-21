@@ -1,6 +1,6 @@
 import pytest
 from typing import Generator
-from DocumentRepository.DocumentRepository import DocumentRepository
+from document_repository.document_repository import DocumentRepository
 
 @pytest.fixture
 def repo() -> Generator[DocumentRepository, None, None]:

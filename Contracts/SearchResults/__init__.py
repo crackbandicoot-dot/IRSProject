@@ -1,1 +1,0 @@
-from .SearchResult import SearchResult

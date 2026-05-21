@@ -1,9 +1,9 @@
 import pytest
 import json
 from unittest.mock import patch, MagicMock
-from Contracts.CrawledPage.CrawledPage import CrawledPage
-from TextProcessor import text_processor
-from Errors.EmbeddingGenerationError import EmbeddingGenerationError
+from contracts.crawled_page.crawled_page import CrawledPage
+from text_processor import text_processor
+from contracts.errors import EmbeddingGenerationError
 
 @pytest.fixture
 def sample_page() -> CrawledPage:

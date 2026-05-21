@@ -1,9 +1,9 @@
 import pytest
 from typing import Tuple, List
 
-from Contracts.IndexedDocument import IndexedDocument
-from Contracts.QueryNodes import HedgeNode, TermNode
-from SearchEngine.SearchEngine import SearchEngine
+from contracts.indexed_document.indexed_document import IndexedDocument
+from contracts.query_nodes import HedgeNode, TermNode
+from search_engine.search_engine import SearchEngine
 
 @pytest.fixture
 def engine_and_docs() -> Tuple[SearchEngine, List[IndexedDocument]]:

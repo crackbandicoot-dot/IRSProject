@@ -1,6 +1,6 @@
 import pytest
 from typing import Generator
-from IndexRepository.IndexRepository import IndexRepository
+from index_repository.index_repository import IndexRepository
 
 
 @pytest.fixture
