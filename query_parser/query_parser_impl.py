@@ -1,4 +1,4 @@
-from contracts.query_nodes import *
+from contracts.query_nodes import AndNode, OrNode, NotNode, HedgeNode, TermNode, QueryNode
 from contracts.errors import QueryError
 
 class QueryParser:

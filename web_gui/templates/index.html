@@ -1,0 +1,55 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRS Web Search</title>
+    <!-- CSS Dependencies -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+    <div id="app" class="app-container">
+        <!-- Header -->
+        <app-header 
+            title="IRS Web Search" 
+            subtitle="Intelligent Retrieval System with RAG capabilities">
+        </app-header>
+
+        <!-- Search Box -->
+        <search-box 
+            v-model:query="query" 
+            :is-searching="isSearching"
+            @search="performSearch">
+        </search-box>
+
+        <!-- Global Error -->
+        <error-alert 
+            v-if="globalError" 
+            :message="globalError">
+        </error-alert>
+
+        <!-- Results Overview -->
+        <div v-if="hasSearched && !isSearching">
+            
+            <!-- RAG Section -->
+            <rag-section 
+                v-if="ragData" 
+                :data="ragData">
+            </rag-section>
+
+            <!-- Search Results Section -->
+            <results-section 
+                v-if="resultsData" 
+                :data="resultsData">
+            </results-section>
+            
+        </div>
+    </div>
+
+    <!-- Application Logic -->
+    <script src="/static/js/components.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

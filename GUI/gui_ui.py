@@ -3,7 +3,7 @@ from typing import List, assert_never
 from contracts.rich_result.rich_result import RichResult
 from .GUI import GUI
 from contracts.either import Either,Ok,Error
-from contracts.errors import *
+from contracts.errors import QueryError, EmbeddingGenerationError, UnsupportedFeatureException, AppError
 _gui = GUI()
 
 
