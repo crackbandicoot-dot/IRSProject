@@ -21,5 +21,6 @@ def get_embedding(text: str) -> List[float]:
     """
     Given a text string, returns an embedding representation useful for vector databases.
     """
-    _logger.info(f"Generating embedding for text: {text[:min(30, len(text))]}...")  # Log only the first 30 characters for brevity
+    # Log only the first 30 characters for brevity
+    _logger.info(f"Generating embedding for text: {text[:min(30, len(text))]}...") 
     return _processor.get_embedding(text)

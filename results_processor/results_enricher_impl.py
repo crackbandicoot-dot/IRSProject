@@ -9,7 +9,7 @@ class ResultsEnricher:
         self._documents = self.db["documents"]
         self.w = 0.5 # Weight for fuzzy score in the combined score (0.5 means equal weight to both)
 
-    def combine(self, fuzzy_results: List[SearchResult], semantic_results: List[SearchResult]) -> List[SearchResult]:
+    def combine(self, fuzzy_results: List[SearchResult],semantic_results: List[SearchResult]) -> List[SearchResult]:
         # Dictionary stores: {document_id: search_result_object}
         merged = {}
         

@@ -11,9 +11,6 @@ class WebServer:
         template_dir = os.path.join(os.path.dirname(__file__), 'templates')
         self.app = Flask(__name__, template_folder=template_dir)
         
-        #log = get_logger(__name__)
-        #log.setLevel(logging.ERROR)
-
         self._query_queue: queue.Queue[str] = queue.Queue()
         self._result_queue: queue.Queue[tuple] = queue.Queue()
 

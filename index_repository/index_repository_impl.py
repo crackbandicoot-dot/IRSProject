@@ -2,11 +2,11 @@ import re
 from typing import List, Dict, Optional
 from pymongo import MongoClient
 from contracts.indexed_document.indexed_document import IndexedDocument
-from contracts.errors import DataBaseFailedOpertaion
 from shared.logger import get_logger
 logger = get_logger(__name__)
 class IndexRepository:
-    def __init__(self, connection_string: str = "mongodb://localhost:27017/", db_name: str = "irs_db",collection_name:str="postings") -> None:
+    def __init__(self, connection_string: str = "mongodb://localhost:27017/",
+         db_name: str = "irs_db",collection_name:str="postings") -> None:
         self.db_name=db_name
         self.collection = collection_name
         self._client = MongoClient(connection_string)
@@ -56,8 +56,7 @@ class IndexRepository:
                if result.deleted_count==0:
                    logger.warning(f"doc_id '{doc_id}' was'nt deleted")
     
-    #TODO: find a way of limitting the number of results on RAM like streaming, 
-    #or max number of things
+    
     def get_relevant_indexes(self, raw_query: str) -> List[IndexedDocument]:
         terms = self._extract_terms(raw_query)
         if not terms:

@@ -17,7 +17,8 @@ def enrich(raw_search_results_either: Either[AppError,List[SearchResult]]) -> Li
    return _enricher.enrich_results(raw_search_results)
 
 @railway
-def combine(fuzzy_results_either: Either[AppError,List[SearchResult]], semantic_results_either: Either[AppError,List[SearchResult]]) -> List[SearchResult]:
+def combine(fuzzy_results_either: Either[AppError,List[SearchResult]],
+   semantic_results_either: Either[AppError,List[SearchResult]]) -> List[SearchResult]:
     _logger.info("Combining fuzzy and semantic search results")
     fuzzy_results = fuzzy_results_either.unwrap()
     semantic_results = semantic_results_either.unwrap()

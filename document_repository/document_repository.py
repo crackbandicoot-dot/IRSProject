@@ -18,7 +18,7 @@ def read_document(doc_id: str) -> Optional[dict]:
     return _instance.read_document(doc_id)
 
 @railway
-def update_document(doc_id: str, document_data: dict,upsert=False) -> None:
+def update_document(doc_id: str, document_data: dict,upsert:bool=False) -> None:
     """Update an existing document, or creates one if upsert is set to True(the default is setted to False)"""
     _logger.info(f"Tryng to update document with id {doc_id}")
     _instance.update_document(document_data,upsert)

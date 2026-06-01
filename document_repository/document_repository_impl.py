@@ -4,7 +4,8 @@ from shared.logger import get_logger
 
 logger = get_logger(__name__)
 class DocumentRepository:
-    def __init__(self, connection_string: str = "mongodb://localhost:27017/", db_name: str = "irs_db",collection_name="documents") -> None:
+    def __init__(self, connection_string: str = "mongodb://localhost:27017/",
+                db_name: str = "irs_db",collection_name:str="documents") -> None:
         self.db_name =db_name
         self.collection_name = collection_name
         self._client = MongoClient(connection_string)

@@ -27,7 +27,8 @@ def get(doc_id: str) -> Optional[List[float]]:
     return _repository.get(doc_id)
 
 @railway
-def semantic_search(query_embedding_either: Either[AppError, List[float]], limit: int = 10, metric: str = "cosine") -> List[SearchResult]:
+def semantic_search(query_embedding_either: Either[AppError, List[float]], 
+    limit: int = 10, metric: str = "cosine") -> List[SearchResult]:
     _logger.info("Tryng to perform semantic search with query embedding")
     query_embedding = query_embedding_either.unwrap()
     return _repository.semantic_search(query_embedding, limit, metric)

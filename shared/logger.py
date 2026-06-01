@@ -15,11 +15,11 @@ class ColoredFormatter(logging.Formatter):
     BOLD_RED = "\x1b[31;1m"
     BLUE = "\x1b[34;20m"
 
-    def __init__(self, datefmt='%H:%M:%S %Y-%m-%d '):
+    def __init__(self, datefmt:str='%H:%M:%S %Y-%m-%d ')-> None:
         super().__init__(datefmt=datefmt)
         
         # Standard white layout template with a bold module tag at the end
-        def make_fmt(color_code):
+        def make_fmt(color_code:str)->str:
             return f"{color_code}%(levelname)s{self.RESET}: %(message)s %(asctime)s, {self.BOLD}%(name)s{self.RESET}"
         
         # Pre-compile formatters with localized color codes
@@ -31,7 +31,7 @@ class ColoredFormatter(logging.Formatter):
             logging.CRITICAL: logging.Formatter(make_fmt(self.BOLD_RED), datefmt=datefmt),
         }
 
-    def format(self, record):
+    def format(self, record: logging.LogRecord)->str:
         formatter = self.formatters.get(record.levelno)
         if formatter:
             return formatter.format(record)

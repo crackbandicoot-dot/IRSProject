@@ -1,5 +1,7 @@
 from contracts.either import Ok
-import web_gui as ui, query_parser,index_repository,search_engine,results_processor,rag,document_embedding_repository,text_processor,document_repository
+import web_gui as ui, query_parser,index_repository
+import search_engine,results_processor,rag,document_repository
+import document_embedding_repository,text_processor
 
 while True:
     raw_query = ui.wait_query()

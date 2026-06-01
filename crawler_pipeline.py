@@ -5,7 +5,7 @@ import web_crawler, document_repository, index_repository, text_processor, docum
 from contracts.crawled_page.crawled_page import CrawledPage
 from contracts.either import Error,Ok, railway
 from shared.logger import get_logger
-
+from contracts.errors import DatabaseFailedOperation
 _logger = get_logger(__name__)
 SagaContext = List[Callable[[], object]]
 
@@ -18,11 +18,12 @@ def rollback_saga(saga_context: SagaContext, page_url: str) -> None:
             case Ok(_):
                 _logger.info(f"Rollback operation succeeded for {page_url}")
             case Error(err):
-                _logger.error(f"Rollback operation failed for {page_url}: {err} databases are corrupted, manual intervention required.")
-                raise Exception(f"Rollback operation failed for {page_url}: {err} databases are corrupted, manual intervention required.")
+                _logger.error(f"Rollback operation failed for {page_url}: {err} databases are corrupted"
+                              "manual intervention required.")
+                raise DatabaseFailedOperation(f"Rollback operation failed for {page_url}: {err}"
+                                    f"databases are corrupted, manual intervention required.")
 @railway
-def process_page(page: CrawledPage, saga_context: SagaContext) -> None:
-    #TODO rename this method
+def process_page(page: CrawledPage, saga_context: SagaContext) -> bool:
     index_data = text_processor.get_index_data(page).unwrap() 
     document_data = index_data["document"]
     doc_id = document_data["_id"]
@@ -50,7 +51,7 @@ def process_page(page: CrawledPage, saga_context: SagaContext) -> None:
         saga_context.append(partial(document_repository.delete_document, doc_id))
 
         document_embedding_repository.save(doc_id, doc_embedding).unwrap()
-
+    return True 
         
 def run_pipeline(seed_urls: List[str], max_pages: int = 50) -> None:
     _logger.info(f"Crawling pipeline started with {len(seed_urls)} seed URLs...")
