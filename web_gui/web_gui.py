@@ -1,4 +1,4 @@
-﻿from typing import List
+from typing import List
 
 from contracts.either import Either, Ok, Error
 from contracts.errors import AppError

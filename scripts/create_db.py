@@ -19,27 +19,32 @@ def _load_seed_data(seed_data_file: str | Path) -> tuple[list[dict], list[dict]]
 
 
 def create_db(connection_string: str, db_name: str, seed_data_file: str | Path = DEFAULT_SEED_DATA_FILE) -> None:
-    documents, postings = _load_seed_data(seed_data_file)
-
+    documents, postings = None, None
+    if seed_data_file != "_":
+        documents, postings = _load_seed_data(seed_data_file)
+        
     client = MongoClient(connection_string)
     db = client[db_name]
 
     db.drop_collection("documents")
     documents_col = db["documents"]
-    documents_col.insert_many(documents)
-    print(f"Inserted {len(documents)} documents into 'documents'.")
+    if documents:
+        documents_col.insert_many(documents)
+    print(f"Inserted {len(documents or "")} documents into 'documents'.")
 
     db.drop_collection("postings")
     postings_col = db["postings"]
-    postings_col.insert_many(postings)
+    if postings:
+        postings_col.insert_many(postings)
     postings_col.create_index([("term", ASCENDING)], name="term_idx")
+    #This is for enforce an integrity rule
     postings_col.create_index(
         [("term", ASCENDING), ("doc_id", ASCENDING)],
         unique=True,
         name="term_doc_unique",
     )
 
-    print(f"Inserted {len(postings)} postings into 'postings' with indexes.")
+    print(f"Inserted {len(postings or "")} postings into 'postings' with indexes.")
     print("Database setup complete.")
 
 
@@ -58,7 +63,7 @@ def main() -> None:
     parser.add_argument(
         "--data-file",
         default=str(DEFAULT_SEED_DATA_FILE),
-        help="Path to the JSON seed data file (default: DBInitializer/db_seed_data.json)",
+        help="Path to the JSON seed data file (default: DBInitializer/db_seed_data.json), use '_' for skip seed data",
     )
     args = parser.parse_args()
     create_db(args.connection, args.db, args.data_file)

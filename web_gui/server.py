@@ -1,17 +1,18 @@
-﻿import os
 import queue
 import threading
 import logging
 from typing import Tuple, Dict, Union
 from flask import Flask, request, jsonify, render_template, Response
+from shared.logger import get_logger
 
+import os
 class WebServer:
     def __init__(self) -> None:
         template_dir = os.path.join(os.path.dirname(__file__), 'templates')
         self.app = Flask(__name__, template_folder=template_dir)
         
-        log = logging.getLogger('werkzeug')
-        log.setLevel(logging.ERROR)
+        #log = get_logger(__name__)
+        #log.setLevel(logging.ERROR)
 
         self._query_queue: queue.Queue[str] = queue.Queue()
         self._result_queue: queue.Queue[tuple] = queue.Queue()

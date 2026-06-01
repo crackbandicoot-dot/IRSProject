@@ -6,7 +6,7 @@ from qdrant_client.http import models
 
 from contracts.search_results import SearchResult
 from contracts.errors import UnsupportedFeatureException
-from .id_generator import generate_document_uuid
+from shared.id_generator import generate_document_uuid
 
 class DocumentEmbeddingRepository:
     # Qdrant supported distances mapped to our string identifiers
@@ -31,9 +31,9 @@ class DocumentEmbeddingRepository:
                 id=generate_document_uuid(doc_id),
                 vector=dict.fromkeys(self.SUPPORTED_METRICS.keys(), embedding),
                 payload={"doc_id": doc_id}
-            )]
-        )
-
+            )])
+        
+        
     def delete(self, doc_id: str) -> None:
         """Deletes a document's embeddings by its doc_id."""
         self.client.delete(
@@ -80,4 +80,3 @@ class DocumentEmbeddingRepository:
             results_list.append(SearchResult(document_id=original_doc_id, score=scored_point.score))
             
         return results_list
-

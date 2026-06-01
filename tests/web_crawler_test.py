@@ -1,16 +1,18 @@
 import pytest
 from web_crawler.web_crawler import crawl
 from contracts.crawled_page.crawled_page import CrawledPage
-
+from contracts.either import Error
 def test_integration_crawl_tourism_sites() -> None:
     # We use a highly available URL related to tourism for the integration test.
     # Max entries is kept small to avoid long test run times blockings.
     seed_urls = ["https://en.wikipedia.org/wiki/Tourism"]
     max_pages = 2
     
-    pages = crawl(seed_urls, max_pages=max_pages)
+    pages_either = crawl(seed_urls, max_pages=max_pages)
     
     # Verify we got some pages crawled
+    assert not isinstance(pages_either,Error)
+    pages = pages_either.unwrap()
     assert len(pages) > 0
     assert len(pages) <= max_pages, "Should not exceed max_pages"
     
@@ -28,8 +30,9 @@ def test_integration_crawls_multiple_pages() -> None:
     seed_urls = ["https://en.wikipedia.org/wiki/Tourism"]
     max_pages = 5
     
-    pages = crawl(seed_urls, max_pages=max_pages)
-    
+    pages_either = crawl(seed_urls, max_pages=max_pages)
+    assert not isinstance(pages_either, Error)
+    pages = pages_either.unwrap()
     # Verify it actually followed links and generated the max number of pages requested
     assert len(pages) == max_pages, f"Crawler should have found {max_pages} pages"
     

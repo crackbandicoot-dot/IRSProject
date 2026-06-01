@@ -6,12 +6,16 @@ from contracts.search_results.search_result import SearchResult
 from typing import List
 from contracts.either import railway,Either
 from contracts.errors import AppError
+from shared.logger import get_logger
+
+_logger = get_logger(__name__)
+_search_engine = SearchEngine()
 
 @railway
 def search(parsed_query_either: Either[AppError,QueryNode],
         relevant_indexes_either: Either[AppError,List[IndexedDocument]]
         ) -> List[SearchResult]:
-    _search_engine = SearchEngine()
+    _logger.info("Tryng to execute search for query")
     parsed_query = parsed_query_either.unwrap()
     relevant_indexes = relevant_indexes_either.unwrap()
     return _search_engine.search(relevant_indexes,parsed_query)
