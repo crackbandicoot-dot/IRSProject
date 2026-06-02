@@ -18,7 +18,7 @@ while True:
     semantic_results = document_embedding_repository.semantic_search(query_embedding, config)
     
     raw_search_results = results_processor.combine(fuzzy_results, semantic_results)
-   
+    
     search_results_either = results_processor.enrich(raw_search_results)
     rag_either =rag.process(raw_query,search_results_either)
     ui.show_result(search_results_either,rag_either)

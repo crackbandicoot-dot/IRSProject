@@ -3,22 +3,24 @@ from contracts.search_results.search_result import SearchResult
 from contracts.indexed_document.indexed_document import IndexedDocument
 from contracts.settings import Config
 from typing import List, Tuple
+import math
 class SearchEngine:
   
     def search(self, index_results: List[IndexedDocument], parsed_query: QueryNode, 
                config: Config) -> List[SearchResult]:
-        print(config.min_score)
+        
         search_results = []
         for document in index_results:
-            min_degree, max_degree = self._evaluate_node(parsed_query,document)
-            if isinstance(parsed_query, AndNode):
-                search_results.append(SearchResult(document.id,0.7*min_degree+0.3*max_degree))
-            elif isinstance(parsed_query,OrNode):
-                search_results.append(SearchResult(document.id,0.3*min_degree+0.7*max_degree))
-            else: 
-                search_results.append(SearchResult(document.id,max_degree))    
+            if len(search_results)>=config.top_k:
+                break
+            degree = self._evaluate_node(parsed_query,document)
+
+            if degree >= config.min_score:
+                search_results.append(SearchResult(document.id,degree))
         return search_results
-    def _evaluate_node(self, query_node: QueryNode, document: IndexedDocument) -> Tuple[float, float]:
+    def _evaluate_node(self, query_node: QueryNode, 
+                       document: IndexedDocument,
+                       ) ->  float:
         if isinstance(query_node, AndNode):
             return self._evaluate_and(query_node,document)
         if isinstance(query_node, OrNode):
@@ -31,21 +33,27 @@ class SearchEngine:
             return self._evaluate_term(query_node,document)
         raise ValueError("Unknown query node type")
     
-    def _evaluate_and(self, and_node: AndNode, document: IndexedDocument) -> Tuple[float, float]:
-        min_left, max_left = self._evaluate_node(and_node.left,document)
-        min_right, max_right = self._evaluate_node(and_node.right,document)
-        return min(min_left, min_right), max(max_left, max_right)
-    def _evaluate_or(self, or_node: OrNode, document: IndexedDocument) -> Tuple[float, float]:
-        min_left, max_left = self._evaluate_node(or_node.left,document)
-        min_right, max_right = self._evaluate_node(or_node.right,document)
-        return min(min_left, min_right), max(max_left, max_right)
-    def _evaluate_not(self, not_node: NotNode, document: IndexedDocument) -> Tuple[float, float]:
-        min_degree, max_degree = self._evaluate_node(not_node.child,document)
-        return 1-max_degree,1-min_degree
-    def _evaluate_hedge(self, hedge_node: HedgeNode, document: IndexedDocument) -> Tuple[float, float]:
-        min_degree, max_degree = self._evaluate_node(hedge_node.child, document)
+    def _evaluate_and(self, and_node: AndNode, document: IndexedDocument,
+                ) -> float:
+        left = self._evaluate_node(and_node.left,document)
+        right = self._evaluate_node(and_node.right,document)
+        return min(left, right)
+    def _evaluate_or(self, or_node: OrNode, document: IndexedDocument,
+        ) -> float:
+        left = self._evaluate_node(or_node.left,document)
+        right = self._evaluate_node(or_node.right,document)
+        return max(left, right)
+    def _evaluate_not(self, not_node: NotNode, document: IndexedDocument,
+                    ) -> float:
+        degree = self._evaluate_node(not_node.child,document)
+        return 1-degree
+    def _evaluate_hedge(self, hedge_node: HedgeNode, document: IndexedDocument,
+                        ) -> float:
+        degree = self._evaluate_node(hedge_node.child, document)
+        if hedge_node.hedge_keyword == "IMPORTANT":
+           return self._mu_important(degree)
         exponent = self._resolve_hedge_exponent(hedge_node.hedge_keyword)
-        return min_degree ** exponent, max_degree ** exponent
+        return degree ** exponent
 
     def _resolve_hedge_exponent(self, hedge_keyword: str) -> float:
         hedges = {
@@ -54,9 +62,19 @@ class SearchEngine:
             "SLIGHTLY": 0.5,
             "SOMEWHAT": 0.75,
             "MILDLY": 0.8,
+            
         }
         return hedges.get(hedge_keyword, 1.0)
 
-    def _evaluate_term(self, term_node: TermNode, document: IndexedDocument) -> Tuple[float, float]:
-        degree_of_belong = document[term_node]
-        return degree_of_belong, degree_of_belong
+    def _evaluate_term(self, term_node: TermNode, document: IndexedDocument) -> float:
+        return document[term_node]
+    
+    @staticmethod
+    def _mu_important(x: float, i: float = 0.7, j: float = 1.0,
+                       k: float = 0.000083) -> float:
+        """Convert raw term weight to 'important' compatibility (paper formula)."""
+        if i <= x <= j:
+            return 1.0
+        boundary = i if x < i else j
+        diff = x - boundary
+        return math.exp(diff * diff * math.log(k))

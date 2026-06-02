@@ -1,6 +1,4 @@
 import re
-import json
-import urllib.request
 from typing import Any, Dict, List
 from contracts.crawled_page.crawled_page import CrawledPage
 from contracts.errors import EmbeddingGenerationError
