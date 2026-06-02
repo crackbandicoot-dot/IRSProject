@@ -12,9 +12,6 @@ class DocumentEmbeddingRepository:
     # Qdrant supported distances mapped to our string identifiers
     SUPPORTED_METRICS = {
         "cosine": models.Distance.COSINE,
-        "euclidean": models.Distance.EUCLID,
-        "dot": models.Distance.DOT,
-        "manhattan": models.Distance.MANHATTAN
     }
 
     def __init__(

@@ -91,4 +91,4 @@ if __name__ == "__main__":
 
     seed_urls = sys.argv[1:] if len(sys.argv) > 1 else DEFAULT_SEED_URLS
 
-    run_pipeline(seed_urls, max_pages=300)
+    run_pipeline(seed_urls, max_pages=2500)
