@@ -71,12 +71,25 @@ def run_pipeline(seed_urls: List[str], max_pages: int = 50) -> None:
 
 if __name__ == "__main__":
     # Default seed URLs if none provided via command line
-    default_seed_urls = [
-        "https://www.digikey.com/",
-        "https://www.mouser.com/",
-        "https://www.adafruit.com/"
+   
+        # A collection of developer-friendly electronics seed URLs and official data APIs.
+# This list prioritizes sites with official APIs or simpler, server-rendered HTML.
+    DEFAULT_SEED_URLS = [
+        # --- Official Developer APIs (Highest stability, zero scraping block risk) ---
+        # --- Hobbyist & Prototyping Sites (Permissive robots.txt, lightweight HTML) ---
+        "https://adafruit.com",     # Structured, server-rendered product pages
+        "https://sparkfun.com",     # Stable class names, developer-friendly layout
+        "https://pololu.com",       # Clean, lightweight HTML pricing tables
+        "https://jameco.com",       # Legacy infrastructure, lacks aggressive JS walls
+        "https://seeedstudio.com",  # Open-source hardware catalog, predictable URLs
+        "https://dfrobot.com",      # Simple DOM hierarchy for easy parsing
+
+        # --- Accessible Regional & Surplus Distributors ---
+        "https://taydaelectronics.com", # Minimalist site architecture, highly scrapeable
+        "https://allelectronics.com"    # Surplus electronics dealer with very basic HTML
+
     ]
 
-    seed_urls = sys.argv[1:] if len(sys.argv) > 1 else default_seed_urls
+    seed_urls = sys.argv[1:] if len(sys.argv) > 1 else DEFAULT_SEED_URLS
 
     run_pipeline(seed_urls, max_pages=300)

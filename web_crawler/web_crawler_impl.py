@@ -16,6 +16,7 @@ class WebCrawler:
         self.robots_parsers: dict[str, RobotFileParser] = {}
         self.user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
 
+    @railway
     def _is_allowed_by_robots(self, url: str) -> bool:
         parsed_url = urlparse(url)
         domain = f"{parsed_url.scheme}://{parsed_url.netloc}"
@@ -24,18 +25,18 @@ class WebCrawler:
             rp = RobotFileParser()
             robots_url = urljoin(domain, "/robots.txt")
             rp.set_url(robots_url)
-            try:
-                response = requests.get(robots_url, headers={'User-Agent': self.user_agent}, timeout=5)
-                if response.status_code == 200:
+            response = requests.get(robots_url, headers={'User-Agent': self.user_agent}, timeout=5)
+            if response.status_code == 200:
                     rp.parse(response.text.splitlines())
-            except Exception as e:
-                logger.warning(f"Could not read robots.txt for {domain}: {e}")
             self.robots_parsers[domain] = rp
             
         return self.robots_parsers[domain].can_fetch(self.user_agent, url)
     
     @railway
     def _process_page(self, url: str) -> tuple[CrawledPage | None, List[str]]:
+            if not self._is_allowed_by_robots(url).unwrap():
+                logger.info(f"Crawling URL {url} disallowed by robots.txt")
+                self.visited_urls.add(url)
 
             # We add a generic User-Agent header as many sites (like wikipedia) block default python-requests headers.
             headers = {'User-Agent': self.user_agent}
@@ -73,12 +74,7 @@ class WebCrawler:
             logger.info(f"Crawling URL: {url}")
             if url in self.visited_urls:
                 continue
-                
-            if not self._is_allowed_by_robots(url):
-                logger.info(f"Crawling URL {url} disallowed by robots.txt")
-                self.visited_urls.add(url)
-                continue
-
+            
             self.visited_urls.add(url)
 
             page_either =self._process_page(url)
@@ -88,6 +84,7 @@ class WebCrawler:
                     page, new_links = page, new_links
                 case Error(err):
                     logger.warning(f"Failed to process page {url}: {err}")
+                    self.visited_urls.add(url)
                     continue
             if page:
                 crawled_pages.append(page)
