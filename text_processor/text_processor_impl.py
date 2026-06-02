@@ -1,9 +1,11 @@
 import re
 from typing import Any, Dict, List
 from contracts.crawled_page.crawled_page import CrawledPage
-from contracts.errors import EmbeddingGenerationError
 from shared.id_generator import generate_id_from_url
 from sentence_transformers import SentenceTransformer
+from .stops_words import STOP_WORDS
+WORD_SPLITTER = re.compile(r"[^\w'-]+")
+
 class TextProcessorImpl:
     def __init__(self) -> None:
         # Removed SentenceTransformer to avoid heavy local dependencies.
@@ -15,31 +17,22 @@ class TextProcessorImpl:
         Returns index data formatted for the MongoDB database schema.
         Includes the raw document and generated postings with frequencies.
         """
-        # Generate a unique document ID based on the URL (or reuse the url if desired)
         doc_id = generate_id_from_url(page.url)
         
-        # Tokenize the content to compute simple term weights
-        words = re.findall(r'\b\w+\b', page.content.lower())
         term_counts: Dict[str, int] = {}
-        for w in words:
-            term_counts[w] = term_counts.get(w, 0) + 1
-            
-        # Boost title terms
-        title_words = re.findall(r'\b\w+\b', page.title.lower())
-        for w in title_words:
-            term_counts[w] = term_counts.get(w, 0) + 2
-            
+        # Tokenize the content to compute simple term weights
+        self._fill_term_count(page.content, term_counts)
+        self._fill_term_count(page.title, term_counts) 
+        
         max_count = max(term_counts.values()) if term_counts else 1
         
         postings = []
         for term, count in term_counts.items():
-            weight = count / max_count # Simple normalized term frequency
             postings.append({
                 "term": term,
                 "doc_id": doc_id,
-                "weight": round(weight, 4)
+                "weight": round(count / max_count, 4)
             })
-            
         return {
             "document": {
                 "_id": doc_id,
@@ -49,6 +42,14 @@ class TextProcessorImpl:
             },
             "postings": postings
         }
+    def _fill_term_count(self, text: str,term_counts:Dict[str,int]) -> None:
+        "Fills  the term_counts and returns the maximum term count found in the text or 0"
+        words = re.findall(WORD_SPLITTER, text.lower())
 
+        for w in words:
+            if w not in STOP_WORDS:
+                term_counts[w] = term_counts.get(w, 0) + 1
+                
+    
     def get_embedding(self, text: str) -> List[float]:
         return self.model.encode(text).tolist()

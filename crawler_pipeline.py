@@ -72,8 +72,7 @@ def run_pipeline(seed_urls: List[str], max_pages: int = 50) -> None:
 if __name__ == "__main__":
     # Default seed URLs if none provided via command line
    
-        # A collection of developer-friendly electronics seed URLs and official data APIs.
-# This list prioritizes sites with official APIs or simpler, server-rendered HTML.
+    # A collection of developer-friendly electronics seed URLs and official data APIs.
     DEFAULT_SEED_URLS = [
         # --- Official Developer APIs (Highest stability, zero scraping block risk) ---
         # --- Hobbyist & Prototyping Sites (Permissive robots.txt, lightweight HTML) ---

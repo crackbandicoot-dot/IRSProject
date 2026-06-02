@@ -3,11 +3,12 @@ from .web_crawler_impl import WebCrawler
 from contracts.crawled_page.crawled_page import CrawledPage
 from contracts.either import railway
 from shared.logger import get_logger
+from typing import Iterator
 
 _logger = get_logger(__name__)
 
 @railway
-def crawl(seed_urls: List[str], max_pages: int = 50) -> List[CrawledPage]:
+def crawl(seed_urls: List[str], max_pages: int = 50) -> Iterator[CrawledPage]:
     """
     Crawls a list of seed URLs and their links up to a maximum number of pages.
     """

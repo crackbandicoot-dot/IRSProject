@@ -1,4 +1,4 @@
-from typing import List, Set
+from typing import List, Set,Iterator
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
@@ -8,6 +8,7 @@ from shared.logger import get_logger
 import threading
 from contracts.either import railway,Ok,Error
 from collections import deque
+
 logger = get_logger(__name__)
 class WebCrawler:
     def __init__(self, max_pages: int = 50) -> None:
@@ -65,7 +66,7 @@ class WebCrawler:
                 urls.append(clean_url)
         return urls
 
-    def crawl(self, seed_urls: List[str]) -> List[CrawledPage]:
+    def crawl(self, seed_urls: List[str]) -> Iterator[CrawledPage]:
         pages_to_visit = deque(seed_urls)
         crawled_pages: List[CrawledPage] = []
 
@@ -87,6 +88,7 @@ class WebCrawler:
                     self.visited_urls.add(url)
                     continue
             if page:
+                yield page
                 crawled_pages.append(page)
                 
             for link in new_links:
