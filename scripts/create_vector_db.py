@@ -20,9 +20,6 @@ def create_vector_collections(host: str, port: int, collection_name: str, vector
         collection_name=collection_name,
         vectors_config={
             "cosine": models.VectorParams(size=vector_size, distance=models.Distance.COSINE),
-            "euclidean": models.VectorParams(size=vector_size, distance=models.Distance.EUCLID),
-            "dot": models.VectorParams(size=vector_size, distance=models.Distance.DOT),
-            "manhattan": models.VectorParams(size=vector_size, distance=models.Distance.MANHATTAN)
         }
     )
     print("Database collection setup complete.")

@@ -1,10 +1,13 @@
 from contracts.query_nodes import QueryNode,AndNode, OrNode, NotNode, HedgeNode, TermNode
 from contracts.search_results.search_result import SearchResult
 from contracts.indexed_document.indexed_document import IndexedDocument
+from contracts.settings import Config
 from typing import List, Tuple
 class SearchEngine:
-
-    def search(self, index_results: List[IndexedDocument], parsed_query: QueryNode) -> List[SearchResult]:
+  
+    def search(self, index_results: List[IndexedDocument], parsed_query: QueryNode, 
+               config: Config) -> List[SearchResult]:
+        print(config.min_score)
         search_results = []
         for document in index_results:
             min_degree, max_degree = self._evaluate_node(parsed_query,document)

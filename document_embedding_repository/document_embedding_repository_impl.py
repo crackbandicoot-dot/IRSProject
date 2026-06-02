@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
-
+from contracts.settings import Config
 from contracts.search_results import SearchResult
 from contracts.errors import UnsupportedFeatureException
 from shared.id_generator import generate_document_uuid
@@ -55,21 +55,15 @@ class DocumentEmbeddingRepository:
         return None
 
     def semantic_search(
-        self, query_embedding: List[float], limit: int = 10, metric: str = "cosine"
+        self, query_embedding: List[float], config:Config
     ) -> List[SearchResult]:
-        metric = metric.lower()
-        if metric not in self.SUPPORTED_METRICS:
-            metrics_str = ', '.join(self.SUPPORTED_METRICS.keys())
-            raise UnsupportedFeatureException(
-                feature_name=metric, 
-                message=f"Supported distance metrics are: {metrics_str}"
-            )
-        
+       
         search_result = self.client.query_points(
             collection_name=self.collection_name,
             query=query_embedding,
-            using=metric,
-            limit=limit,
+            using="cosine",
+            score_threshold=config.min_score,
+            limit=config.top_k,
             with_payload=True
         ).points
 

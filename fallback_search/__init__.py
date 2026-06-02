@@ -1,0 +1,1 @@
+from .fallback_search import search

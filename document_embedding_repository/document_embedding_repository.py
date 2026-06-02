@@ -3,6 +3,7 @@ from typing import List, Optional
 from contracts.errors import AppError
 from document_embedding_repository.document_embedding_repository_impl import DocumentEmbeddingRepository
 from contracts.search_results.search_result import SearchResult
+from contracts.settings import Config
 from contracts.either import Either, railway
 from shared.logger import get_logger
 
@@ -28,7 +29,8 @@ def get(doc_id: str) -> Optional[List[float]]:
 
 @railway
 def semantic_search(query_embedding_either: Either[AppError, List[float]], 
-    limit: int = 10, metric: str = "cosine") -> List[SearchResult]:
+    config:Config,
+    ) -> List[SearchResult]:
     _logger.info("Tryng to perform semantic search with query embedding")
     query_embedding = query_embedding_either.unwrap()
-    return _repository.semantic_search(query_embedding, limit, metric)
+    return _repository.semantic_search(query_embedding,config)
