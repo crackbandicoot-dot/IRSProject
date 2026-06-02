@@ -1,7 +1,8 @@
 import queue
 import threading
 import logging
-from typing import Tuple, Dict, Union
+import uuid
+from typing import Tuple, Dict, Union, Optional
 from flask import Flask, request, jsonify, render_template, Response
 from shared.logger import get_logger
 
@@ -11,30 +12,59 @@ class WebServer:
         template_dir = os.path.join(os.path.dirname(__file__), 'templates')
         self.app = Flask(__name__, template_folder=template_dir)
         
-        self._query_queue: queue.Queue[str] = queue.Queue()
-        self._result_queue: queue.Queue[tuple] = queue.Queue()
+        self._query_queue: queue.Queue[Tuple[str, str]] = queue.Queue()
+        self._active_query_id: Optional[str] = None
+        
+        self._search_results: Dict[str, dict] = {}
+        self._search_events: Dict[str, threading.Event] = {}
+        
+        self._rag_results: Dict[str, dict] = {}
+        self._rag_events: Dict[str, threading.Event] = {}
 
         self._setup_routes()
 
     def _setup_routes(self) -> None:
-        @self.app.route('/')
-        def _index() -> str:
-            return render_template('index.html')
+        self.app.add_url_rule('/', 'index', self._index)
+        self.app.add_url_rule('/api/search', 'search', self._search, methods=['POST'])
+        self.app.add_url_rule('/api/rag/<query_id>', 'rag', self._rag, methods=['GET'])
 
-        @self.app.route('/api/search', methods=['POST'])
-        def _search() -> Union[Response, Tuple[Response, int]]:
-            data = request.json
-            if not data or 'query' not in data:
-                return jsonify({"error": "No query provided"}), 400
-                
-            self._query_queue.put(data['query'])
+    def _index(self) -> str:
+        return render_template('index.html')
+
+    def _search(self) -> Union[Response, Tuple[Response, int]]:
+        data = request.json
+        if not data or 'query' not in data:
+            return jsonify({"error": "No query provided"}), 400
             
-            results, rag = self._result_queue.get()
+        query_id = str(uuid.uuid4())
+        self._search_events[query_id] = threading.Event()
+        self._rag_events[query_id] = threading.Event()
+        
+        self._query_queue.put((query_id, data['query']))
+        
+        self._search_events[query_id].wait()
+        results = self._search_results.pop(query_id)
+        
+        return jsonify({
+            "id": query_id,
+            "results": results
+        })
+
+    def _rag(self, query_id: str) -> Union[Response, Tuple[Response, int]]:
+        if query_id not in self._rag_events:
+            return jsonify({"error": "Invalid request ID"}), 404
             
-            return jsonify({
-                "results": results,
-                "rag": rag
-            })
+        self._rag_events[query_id].wait()
+        rag = self._rag_results.pop(query_id)
+        
+        if query_id in self._search_events:
+            del self._search_events[query_id]
+        if query_id in self._rag_events:
+            del self._rag_events[query_id]
+            
+        return jsonify({
+            "rag": rag
+        })
 
     def run(self, port: int = 5000) -> None:
         self._thread = threading.Thread(
@@ -45,7 +75,17 @@ class WebServer:
         self._thread.start()
 
     def wait_query(self) -> str:
-        return self._query_queue.get()
+        query_id, query = self._query_queue.get()
+        self._active_query_id = query_id
+        return query
 
-    def show_result(self, results: dict, rag: dict) -> None:
-        self._result_queue.put((results, rag))
+    def show_search_results(self, results: dict) -> None:
+        if self._active_query_id:
+            self._search_results[self._active_query_id] = results
+            self._search_events[self._active_query_id].set()
+
+    def show_rag_results(self, rag: dict) -> None:
+        if self._active_query_id:
+            self._rag_results[self._active_query_id] = rag
+            self._rag_events[self._active_query_id].set()
+            self._active_query_id = None

@@ -1,7 +1,10 @@
+import heapq
 from pymongo import MongoClient
 from contracts.search_results.search_result import SearchResult
 from contracts.rich_result import RichResult
-from typing import List
+from typing import Iterable, List
+
+from contracts.settings import Config
 class ResultsEnricher:
     def __init__(self,connection_string: str = "mongodb://localhost:27017/", db_name: str = "irs_db") -> None:
         self.client = MongoClient(connection_string)
@@ -9,36 +12,43 @@ class ResultsEnricher:
         self._documents = self.db["documents"]
         self.w = 0.5 # Weight for fuzzy score in the combined score (0.5 means equal weight to both)
 
-    def combine(self, fuzzy_results: List[SearchResult],semantic_results: List[SearchResult]) -> List[SearchResult]:
-        # Dictionary stores: {document_id: search_result_object}
-        merged = {}
+    def combine(self, fuzzy_results: Iterable[SearchResult],
+                semantic_results: Iterable[SearchResult],
+                config:Config
+                ) -> Iterable[SearchResult]:
         
-        # 1. Process fuzzy results (updates score in-place)
-        for result in fuzzy_results:
-            result.score *= self.w
-            merged[result.document_id] = result
+        combined_scores = {}
+        for res in fuzzy_results:
+            combined_scores[res.document_id] = combined_scores.get(res.document_id, 0.0) + self.w * res.score
             
-        # 2. Process semantic results
-        w_semantic = 1.0 - self.w
-        for result in semantic_results:
-            if result.document_id in merged:
-                # Add to the existing object's score
-                merged[result.document_id].score += w_semantic * result.score
-            else:
-                # Update score and store the object
-                result.score *= w_semantic
-                merged[result.document_id] = result
-        return list(merged.values())
+        for res in semantic_results:
+            combined_scores[res.document_id] = combined_scores.get(res.document_id, 0.0) + (1.0 - self.w) * res.score
+            
+        heap = []
+        for doc_id, score in combined_scores.items():
+            if score >= config.min_score:
+                if len(heap) < config.top_k:
+                    heapq.heappush(heap, (score, doc_id))
+                else:
+                    heapq.heappushpop(heap, (score, doc_id))
+                    
+        return [
+            SearchResult(document_id=doc_id, score=score) 
+            for score, doc_id in sorted(heap, key=lambda x: x[0], reverse=True)
+        ]
+        
     
-    def enrich_results(self, raw_search_results: List[SearchResult]) -> List[RichResult]:
+    def enrich_results(self, raw_search_results: Iterable[SearchResult]) -> List[RichResult]:
         rich_results: List[RichResult] = []
         for result in raw_search_results:
             doc = self._documents.find_one({"_id": result.document_id})
             if doc:
+                content:str =doc.get("content", "")
                 rich_results.append(RichResult(
                     title=doc.get("title", ""),
-                    snippet=doc.get("content", "")[:150],
-                    score=result.score
+                    snippet=content[:min(len(content), 650)] + ("..." if len(content) > 200 else ""),
+                    score=result.score,
+                    url = doc.get("url","")
                 ))
         return rich_results
      

@@ -22,6 +22,9 @@ const app = createApp({
             resultsData.value = null;
 
             try {
+                // First call: start search and return results
+                ragData.value = { message: "Preparing AI answer..." };
+                
                 const response = await fetch("/api/search", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -33,14 +36,28 @@ const app = createApp({
                 }
 
                 const data = await response.json();
-                ragData.value = data.rag;
                 resultsData.value = data.results;
+                const queryId = data.id;
+                
+                // Allow user to interact with the search box again while RAG prepares
+                isSearching.value = false;
+
+                // Second call: get RAG results
+                const ragResponse = await fetch(`/api/rag/${queryId}`);
+                if (!ragResponse.ok) {
+                    throw new Error('Server returned status: ' + ragResponse.status);
+                }
+
+                const ragJson = await ragResponse.json();
+                ragData.value = ragJson.rag;
                 
             } catch (err) {
                 globalError.value = err.message || "An unexpected error occurred.";
                 console.error(err);
-            } finally {
-                isSearching.value = false;
+                
+                if (isSearching.value) {
+                    isSearching.value = false;
+                }
             }
         };
 

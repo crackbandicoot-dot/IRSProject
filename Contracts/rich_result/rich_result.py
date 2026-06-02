@@ -5,3 +5,4 @@ class RichResult(TypedDict):
     title: str
     snippet: str
     score: float
+    url:str

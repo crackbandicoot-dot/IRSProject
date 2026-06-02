@@ -13,10 +13,7 @@ class WebGUI:
     def wait_query(self) -> str:
         return self._server.wait_query()
 
-    def show_result(self, 
-                    search_results_either: Either[AppError, List[RichResult]], 
-                    rag_message_either: Either[AppError, str]) -> None:
-        
+    def show_search_results(self, search_results_either: Either[AppError, List[RichResult]]) -> None:
         results_data = {}
         match search_results_either:
             case Ok(value=search_results):
@@ -24,6 +21,9 @@ class WebGUI:
             case Error(error=app_error):
                 results_data["error"] = getattr(app_error, 'error_message', str(app_error))
                 
+        self._server.show_search_results(results_data)
+
+    def show_rag_results(self, rag_message_either: Either[AppError, str]) -> None:
         rag_data = {}
         match rag_message_either:
             case Ok(value=message):
@@ -31,4 +31,4 @@ class WebGUI:
             case Error(error=app_error):
                 rag_data["error"] = getattr(app_error, 'error_message', str(app_error))
 
-        self._server.show_result(results_data, rag_data)
+        self._server.show_rag_results(rag_data)

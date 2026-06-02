@@ -70,6 +70,11 @@ const RagSection = {
 
 const ResultsSection = {
     props: ['data'],
+    methods: {
+        openUrl(url) {
+            if (url) window.open(url, '_blank');
+        }
+    },
     template: `
         <div>
             <h2 class="section-title">Search Results</h2>
@@ -79,8 +84,11 @@ const ResultsSection = {
             </div>
             
             <div v-else-if="data.data && data.data.length > 0" class="results-list">
-                <div v-for="(item, index) in data.data" :key="index" class="result-card">
-                    <a v-if="item.url" :href="item.url" target="_blank" class="result-title">
+                <div v-for="(item, index) in data.data" :key="index" 
+                     class="result-card"
+                     @click="openUrl(item.url)"
+                     :style="item.url ? 'cursor: pointer;' : ''">
+                    <a v-if="item.url" :href="item.url" target="_blank" class="result-title" @click.stop>
                         {{ item.title || item.doc_id || 'Untitled Document' }}
                     </a>
                     <h3 v-else class="result-title">

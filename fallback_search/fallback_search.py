@@ -2,7 +2,8 @@ from contracts.settings import Config
 from contracts.search_results.search_result import SearchResult
 from typing import List
 from ddgs import DDGS
-
+from contracts.either import railway
+@railway
 def search(query: str, config: Config) -> List[SearchResult]:
     results = []
     with DDGS() as duck_duck_go:

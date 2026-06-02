@@ -13,9 +13,14 @@ def wait_query() -> str:
     _logger.info("Waiting for user query")
     return _gui.wait_query()
 
-def show_result(
-    search_results_either: Either[AppError, List[RichResult]], 
+def show_search_results(
+    search_results_either: Either[AppError, List[RichResult]]
+) -> None:
+    _logger.info("Tryng to show search results on UI")
+    _gui.show_search_results(search_results_either)
+
+def show_rag_results(
     rag_message_either: Either[AppError, str]
 ) -> None:
-    _logger.info("Tryng to show results on UI")
-    _gui.show_result(search_results_either, rag_message_either)
+    _logger.info("Tryng to show rag results on UI")
+    _gui.show_rag_results(rag_message_either)
