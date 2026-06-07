@@ -19,7 +19,7 @@ while True:
     
     raw_search_results = results_processor.combine(fuzzy_results, semantic_results,config)
     
-    if not raw_search_results.unwrap():
+    if isinstance(ok :=raw_search_results,Ok) and ok:
         raw_search_results = fallback_search.search(raw_query, config)
     search_results_either = results_processor.enrich(raw_search_results)
     ui.show_search_results(search_results_either)

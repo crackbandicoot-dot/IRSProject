@@ -4,12 +4,12 @@ from contracts.crawled_page.crawled_page import CrawledPage
 from shared.id_generator import generate_id_from_url
 from sentence_transformers import SentenceTransformer
 from .stops_words import STOP_WORDS
-WORD_SPLITTER = re.compile(r"[^\w'-]+")
+#Matches lowercase english words and numbers including floating point numbers
+TOKEN_SPLITTER = re.compile(r"[a-z']+|\d+(?:[.,]\d+)?")
 
 class TextProcessorImpl:
     def __init__(self) -> None:
-        # Removed SentenceTransformer to avoid heavy local dependencies.
-        # We will use a free API instead.
+        
         self.model =SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2',local_files_only=True)
 
     def get_index_data(self, page: CrawledPage) -> Dict[str, Any]:
@@ -44,7 +44,7 @@ class TextProcessorImpl:
         }
     def _fill_term_count(self, text: str,term_counts:Dict[str,int]) -> None:
         "Fills  the term_counts and returns the maximum term count found in the text or 0"
-        words = re.findall(WORD_SPLITTER, text.lower())
+        words = re.findall(TOKEN_SPLITTER, text.lower())
 
         for w in words:
             if w not in STOP_WORDS:
