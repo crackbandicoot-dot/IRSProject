@@ -1,6 +1,7 @@
 from contracts.query_nodes import AndNode, OrNode, NotNode, HedgeNode, TermNode, QueryNode
 from contracts.errors import QueryError
-
+from shared.constants import TOKEN_REGEX
+import re
 class QueryParser:
     
     def __init__(self, raw_query: str) -> None:
@@ -46,7 +47,7 @@ class QueryParser:
     def _primary(self) -> QueryNode:
         if self.current == "\0":
             raise QueryError(self.index+1, "Unexpected end of query")
-        if self.current.islower():
+        if re.fullmatch(TOKEN_REGEX,self.current):
             term = self.current
             self._next()
             return TermNode(term)
@@ -69,5 +70,3 @@ class QueryParser:
         if self.index+offset>len(self.query_tokens)-1:
             return "\0"
         return self.query_tokens[self.index+offset]
-    
-    

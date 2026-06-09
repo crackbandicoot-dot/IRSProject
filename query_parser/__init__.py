@@ -1,1 +1,1 @@
-from .query_parser import parse
+from .query_parser import parse,strip_operators

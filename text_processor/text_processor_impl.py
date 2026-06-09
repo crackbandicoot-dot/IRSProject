@@ -4,8 +4,8 @@ from contracts.crawled_page.crawled_page import CrawledPage
 from shared.id_generator import generate_id_from_url
 from sentence_transformers import SentenceTransformer
 from .stops_words import STOP_WORDS
+from shared.constants import TOKEN_REGEX
 #Matches lowercase english words and numbers including floating point numbers
-TOKEN_SPLITTER = re.compile(r"[a-z']+|\d+(?:[.,]\d+)?")
 
 class TextProcessorImpl:
     def __init__(self) -> None:
@@ -44,7 +44,7 @@ class TextProcessorImpl:
         }
     def _fill_term_count(self, text: str,term_counts:Dict[str,int]) -> None:
         "Fills  the term_counts and returns the maximum term count found in the text or 0"
-        words = re.findall(TOKEN_SPLITTER, text.lower())
+        words = re.findall(TOKEN_REGEX, text.lower())
 
         for w in words:
             if w not in STOP_WORDS:

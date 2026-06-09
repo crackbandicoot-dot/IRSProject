@@ -1,4 +1,4 @@
-from contracts.either import Ok
+from contracts.either import Either, Ok,Error
 import web_gui as ui, query_parser,index_repository
 import search_engine,results_processor,rag,document_repository
 import document_embedding_repository,text_processor
@@ -7,6 +7,7 @@ from configurator import get_config
 
 while True:
     raw_query = ui.wait_query()
+    
     parsed_query = query_parser.parse(raw_query)
     config = get_config()
     #Logic for Fuzzy Search
@@ -14,16 +15,17 @@ while True:
     fuzzy_results = search_engine.search(parsed_query,relevant_indexes,config)
     
     #Logic for semantic search
-    query_embedding = text_processor.get_embedding(raw_query)
+    splitted_query = query_parser.strip_operators(raw_query)
+    query_embedding = text_processor.get_embedding(splitted_query)
     semantic_results = document_embedding_repository.semantic_search(query_embedding, config)
     
     raw_search_results = results_processor.combine(fuzzy_results, semantic_results,config)
     
-    if isinstance(ok :=raw_search_results,Ok) and ok:
+    if not raw_search_results.unwrap_or(False):
         raw_search_results = fallback_search.search(raw_query, config)
     search_results_either = results_processor.enrich(raw_search_results)
     ui.show_search_results(search_results_either)
     
     rag_either =rag.process(raw_query,search_results_either)
     ui.show_rag_results(rag_either)
-
+   

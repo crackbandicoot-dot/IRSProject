@@ -28,7 +28,7 @@ def process_page(page: CrawledPage, saga_context: SagaContext) -> bool:
     document_data = index_data["document"]
     doc_id = document_data["_id"]
     postings = index_data["postings"]
-    doc_embedding = text_processor.get_embedding(page.content).unwrap()
+    doc_embedding = text_processor.get_embedding(Ok(page.content)).unwrap()
 
     _logger.info(f"Processing page: {page.url} (doc_id: {doc_id})")
 
@@ -91,4 +91,4 @@ if __name__ == "__main__":
 
     seed_urls = sys.argv[1:] if len(sys.argv) > 1 else DEFAULT_SEED_URLS
 
-    run_pipeline(seed_urls, max_pages=2500)
+    run_pipeline(seed_urls, max_pages=100)

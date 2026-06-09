@@ -2,7 +2,7 @@ import string
 from typing import Any, Dict, List
 from contracts.crawled_page.crawled_page import CrawledPage
 from .text_processor_impl import TextProcessorImpl
-from contracts.either import railway
+from contracts.either import railway,Either,AppError
 from shared.logger import get_logger
 
 _processor = TextProcessorImpl()
@@ -17,10 +17,11 @@ def get_index_data(page: CrawledPage) -> Dict[str, Any]:
     return _processor.get_index_data(page)
 
 @railway
-def get_embedding(text: str) -> List[float]:
+def get_embedding(text_either: Either[AppError,str]) -> List[float]:
     """
     Given a text string, returns an embedding representation useful for vector databases.
     """
+    text = text_either.unwrap()
     # Log only the first 30 characters for brevity
     _logger.info(f"Generating embedding for text: {text[:min(30, len(text))]}...") 
     return _processor.get_embedding(text)

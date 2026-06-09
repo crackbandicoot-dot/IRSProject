@@ -1,7 +1,7 @@
 import functools
 import sys
 from dataclasses import dataclass
-from typing import (TypeVar, Generic, Union, Callable, ParamSpec,
+from typing import (Any, TypeVar, Generic, Union, Callable, ParamSpec,
                      NoReturn, get_args,
                      cast
 )
@@ -15,6 +15,7 @@ from shared.logger import get_logger
 # ==========================================
 L = TypeVar('L', bound=Exception, covariant=True)
 R = TypeVar('R', covariant=True)
+Y = TypeVar('Y')
 P = ParamSpec('P')
 
 # Type hint the tuple so the IDE knows exactly what it is
@@ -26,16 +27,20 @@ APP_ERRORS_TUPLE: tuple[type[Exception], ...] = get_args(AppError)
 @dataclass(frozen=True,slots=True)
 class Ok(Generic[R]):
     value: R
+    def unwrap_or(self, _) -> R:
+        return self.value
     def unwrap(self) -> R:
         return self.value
 
 @dataclass(frozen=True,slots=True)
 class Error(Generic[L]):
     error: L
+    def unwrap_or(self, default:Y) -> Y:
+        return default
     def unwrap(self) -> NoReturn:
         raise HandledToken().with_traceback(None)  # Prevents stack trace for control flow token
 
-# THE FIX: L must be listed first so Either[AppError, ReturnType] maps correctly!
+
 Either = Union[Error[L], Ok[R]]
 
 # ==========================================
