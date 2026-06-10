@@ -21,7 +21,8 @@
         <search-box 
             v-model:query="query" 
             :is-searching="isSearching"
-            @search="performSearch">
+            @search="performSearch"
+            @improve="improveQuery">
         </search-box>
 
         <!-- Global Error -->

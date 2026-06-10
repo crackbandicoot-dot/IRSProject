@@ -61,11 +61,44 @@ const app = createApp({
             }
         };
 
+        const improveQuery = async () => {
+            const q = query.value.trim();
+            if (!q || isSearching.value) return;
+
+            isSearching.value = true;
+            globalError.value = null;
+
+            try {
+                const response = await fetch("/api/improve_query", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ query: q })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Server returned status: ' + response.status);
+                }
+
+                const data = await response.json();
+                if (data.improved_query && data.improved_query.improved_query) {
+                    query.value = data.improved_query.improved_query;
+                } else if (data.improved_query && data.improved_query.error) {
+                    globalError.value = data.improved_query.error;
+                }
+            } catch (err) {
+                globalError.value = err.message || "An unexpected error occurred.";
+                console.error(err);
+            } finally {
+                isSearching.value = false;
+            }
+        };
+
         return {
             query,
             isSearching,
             hasSearched,
             performSearch,
+            improveQuery,
             globalError,
             ragData,
             resultsData

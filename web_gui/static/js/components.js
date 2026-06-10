@@ -33,6 +33,14 @@ const SearchBox = {
                 </span>
                 <span v-else>Search</span>
             </button>
+            <button 
+                @click="$emit('improve')" 
+                :disabled="isSearching || !query.trim()"
+                class="search-button secondary"
+                style="margin-left: 0.5rem;"
+            >
+                Improve
+            </button>
         </div>
     `
 };

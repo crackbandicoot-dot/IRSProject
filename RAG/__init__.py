@@ -1,1 +1,1 @@
-from .rag import process
+from .rag import process,get_llm_response

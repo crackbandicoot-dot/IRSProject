@@ -6,8 +6,11 @@ from .query_error import QueryError
 from .unsupported_feature_exception import UnsupportedFeatureException
 from .database_failed_operation import DatabaseFailedOperation
 from .handled_token import HandledToken
+from .model_generation import ModelGenerationError
 from .unexpected_error import UnexpectedError
+
 AppError = Union[EmbeddingGenerationError, UnsupportedFeatureException,
                  DatabaseFailedOperation, HandledToken,UnexpectedError,
+                 ModelGenerationError,
                  QueryError
                  ]

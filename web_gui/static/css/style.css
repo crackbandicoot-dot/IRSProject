@@ -105,6 +105,14 @@ body {
     background-color: var(--primary-hover);
 }
 
+.search-button.secondary {
+    background-color: var(--success-color);
+}
+
+.search-button.secondary:hover:not(:disabled) {
+    background-color: #047857;
+}
+
 .search-button:disabled {
     background-color: #d1d5db;
     cursor: not-allowed;

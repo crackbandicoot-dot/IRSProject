@@ -38,7 +38,7 @@ class ResultsEnricher:
         ]
         
     
-    def enrich_results(self, raw_search_results: Iterable[SearchResult]) -> List[RichResult]:
+    def enrich_results(self,raw_search_results: Iterable[SearchResult]]) -> List[RichResult]:
         rich_results: List[RichResult] = []
         for result in raw_search_results:
             doc = self._documents.find_one({"_id": result.document_id})
@@ -46,7 +46,7 @@ class ResultsEnricher:
                 content:str =doc.get("content", "")
                 rich_results.append(RichResult(
                     title=doc.get("title", ""),
-                    snippet=content[:min(len(content), 650)] + ("..." if len(content) > 200 else ""),
+                    snippet=content[:min(len(content), 650)],
                     score=result.score,
                     url = doc.get("url","")
                 ))
