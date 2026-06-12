@@ -1,7 +1,9 @@
 from .document_repository_impl import DocumentRepository
-from contracts.either import railway
+from contracts.either import railway, Either
+from contracts.errors import AppError
+from contracts.search_results.search_result import SearchResult
 from shared.logger import get_logger
-from typing import Optional
+from typing import Optional, Iterable, List
 _instance = DocumentRepository()
 _logger = get_logger(__name__)
 
@@ -16,6 +18,14 @@ def read_document(doc_id: str) -> Optional[dict]:
     """Read a document by its ID."""
     _logger.info(f"Tryng to read document with id '{doc_id}'")
     return _instance.read_document(doc_id)
+
+@railway
+def read_documents(results_either: Either[AppError, Iterable[SearchResult]]) -> List[dict]:
+    """Read multiple documents by search results."""
+    results = results_either.unwrap()
+    doc_ids = [res.document_id for res in results]
+    _logger.info(f"Trying to read {len(doc_ids)} documents")
+    return _instance.read_documents(doc_ids)
 
 @railway
 def update_document(doc_id: str, document_data: dict,upsert:bool=False) -> None:

@@ -27,16 +27,33 @@ while True:
             
             raw_search_results = results_processor.combine(fuzzy_results, semantic_results, config)
             
-            if raw_search_results.unwrap_or(True):
+            if not raw_search_results.unwrap_or([]):
                 search_results_either = fallback_search.search(raw_query, config)
+                context_either = results_processor.prepare_context_from_rich(raw_query,search_results_either)
             else:
-                #Prepares docuemnts for RAG
-                search_results_either = results_processor.enrich(raw_search_results)
+                # Orchestrator coordinates data fetching and enrichment
+                documents_either = document_repository.read_documents(raw_search_results)
+                enriched_either = results_processor.enrich(raw_search_results, documents_either)
+                
+                search_results_either = results_processor.get_ui_results(enriched_either)
+                rag_results_either = results_processor.get_rag_results(enriched_either)
+                context_either = results_processor.prepare_context(raw_query,rag_results_either)
             
             ui.show(SearchResultsResponse(results=search_results_either))
             
-            rag_either = rag.process(raw_query, search_results_either)
-            ui.show(RAGResponse(rag=rag_either))
+            @railway
+            def rag_block() -> str:
+                with open("rag_system_prompt.md", "r") as prompt_file:
+                    # We pass context as a list containing the prepared string
+                    return rag.get_llm_response(
+                        provider="Google", # Or Gemini depending on rag.py implementation
+                        model="gemini-3.1-flash-lite",
+                        system_prompt=prompt_file.read(),
+                        context=[context_either.unwrap()],
+                        temperature=0.3
+                    ).unwrap()
+
+            ui.show(RAGResponse(rag=rag_block()))
 
         case ImproveQueryRequest(query=raw_query):
             @railway

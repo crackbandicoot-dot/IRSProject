@@ -1,1 +1,1 @@
-from .rich_result import RichResult
+from .rich_result import RichResult,RAGResult

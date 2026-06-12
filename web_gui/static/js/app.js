@@ -5,15 +5,21 @@ const app = createApp({
     setup() {
         const query = ref('');
         const isSearching = ref(false);
+        const isImproving = ref(false);
         const hasSearched = ref(false);
         const globalError = ref(null);
         
         const ragData = ref(null);
         const resultsData = ref(null);
+        const showHelp = ref(false);
+
+        const toggleHelp = () => {
+            showHelp.value = !showHelp.value;
+        };
 
         const performSearch = async () => {
             const q = query.value.trim();
-            if (!q || isSearching.value) return;
+            if (!q || isSearching.value || isImproving.value) return;
 
             isSearching.value = true;
             hasSearched.value = true;
@@ -63,9 +69,9 @@ const app = createApp({
 
         const improveQuery = async () => {
             const q = query.value.trim();
-            if (!q || isSearching.value) return;
+            if (!q || isSearching.value || isImproving.value) return;
 
-            isSearching.value = true;
+            isImproving.value = true;
             globalError.value = null;
 
             try {
@@ -89,19 +95,22 @@ const app = createApp({
                 globalError.value = err.message || "An unexpected error occurred.";
                 console.error(err);
             } finally {
-                isSearching.value = false;
+                isImproving.value = false;
             }
         };
 
         return {
             query,
             isSearching,
+            isImproving,
             hasSearched,
             performSearch,
             improveQuery,
             globalError,
             ragData,
-            resultsData
+            resultsData,
+            showHelp,
+            toggleHelp
         };
     }
 });

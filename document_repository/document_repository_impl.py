@@ -27,6 +27,21 @@ class DocumentRepository:
             doc.pop("_id")
             return doc
         logger.warning(f"Document with id '{doc_id}' not found in collection '{self.collection_name}'.")
+
+    def read_documents(self, doc_ids: list[str]) -> list[dict]:
+        """Read multiple documents by their IDs."""
+        docs = list(self._documents.find({"_id": {"$in": doc_ids}}))
+        doc_map = {doc["_id"]: doc for doc in docs}
+        result = []
+        for doc_id in doc_ids:
+            if doc_id in doc_map:
+                doc = doc_map[doc_id]
+                if "_id" in doc:
+                    doc.pop("_id")
+                result.append(doc)
+            else:
+                logger.warning(f"Document with id '{doc_id}' not found.")
+        return result
         
     def update_document(self,document_data: dict,upsert:bool) -> None:
         result = self._documents.update_one({"_id": document_data["doc_id"]}, {"$set": document_data},upsert)

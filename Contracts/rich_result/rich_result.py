@@ -6,3 +6,8 @@ class RichResult(TypedDict):
     snippet: str
     score: float
     url:str
+
+class RAGResult(TypedDict):
+    title: str
+    content: str
+    url: str

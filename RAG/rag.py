@@ -6,23 +6,17 @@ from shared.logger import get_logger
 from typing import List,Literal
 from google import genai
 from google.genai import types
-_instance = GitHubModelsRAG()
+
 client = genai.Client()
 _logger = get_logger(__name__)
-@railway
-def process(query: str, rich_results: Either[AppError, list[RichResult]]) -> str:
-    _logger.info("Tryng to make retrieval augmented generation for query")
-    results = rich_results.unwrap()
-    context = [r["snippet"] for r in results]
-    return _instance.process(query, context)
 @railway
 def get_llm_response(provider:Literal["GitHub","Google"],model:str,
                        system_prompt:str,context:List[str],
                        temperature:float)->str:
     match provider:
         case "GitHub":
-            return "Hello"
-        case "Gemini":
+            raise NotImplementedError()
+        case "Google":
             response = client.models.generate_content(
                     model=model,
                     contents = context,

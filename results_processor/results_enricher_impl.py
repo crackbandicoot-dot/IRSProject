@@ -1,15 +1,11 @@
 import heapq
-from pymongo import MongoClient
 from contracts.search_results.search_result import SearchResult
-from contracts.rich_result import RichResult
-from typing import Iterable, List
+from contracts.rich_result import RichResult, RAGResult
+from typing import Iterable, List, Tuple
 
 from contracts.settings import Config
 class ResultsEnricher:
-    def __init__(self,connection_string: str = "mongodb://localhost:27017/", db_name: str = "irs_db") -> None:
-        self.client = MongoClient(connection_string)
-        self.db = self.client[db_name]
-        self._documents = self.db["documents"]
+    def __init__(self) -> None:
         self.w = 0.5 # Weight for fuzzy score in the combined score (0.5 means equal weight to both)
 
     def combine(self, fuzzy_results: Iterable[SearchResult],
@@ -38,17 +34,24 @@ class ResultsEnricher:
         ]
         
     
-    def enrich_results(self,raw_search_results: Iterable[SearchResult]]) -> List[RichResult]:
+    def enrich(self, raw_search_results: Iterable[SearchResult], 
+               documents: List[dict]) -> Tuple[List[RichResult], List[RAGResult]]:
         rich_results: List[RichResult] = []
-        for result in raw_search_results:
-            doc = self._documents.find_one({"_id": result.document_id})
-            if doc:
-                content:str =doc.get("content", "")
-                rich_results.append(RichResult(
-                    title=doc.get("title", ""),
-                    snippet=content[:min(len(content), 650)],
-                    score=result.score,
-                    url = doc.get("url","")
-                ))
-        return rich_results
+        rag_results: List[RAGResult] = []
+        
+        # We assume documents are in the same order as raw_search_results
+        for result, doc in zip(raw_search_results, documents):
+            content: str = doc.get("content", "")
+            rich_results.append(RichResult(
+                title=doc.get("title", ""),
+                snippet=content[:min(len(content), 650)],
+                score=result.score,
+                url=doc.get("url", "")
+            ))
+            rag_results.append(RAGResult(
+                title=doc.get("title", ""),
+                content=content,
+                url=doc.get("url", "")
+            ))
+        return rich_results, rag_results
      
