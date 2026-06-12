@@ -97,7 +97,7 @@ class WebServer:
     def run(self, port: int = 5000) -> None:
         self._thread = threading.Thread(
             target=self.app.run,
-            kwargs={"host": "127.0.0.1", "port": port, "use_reloader": False, "debug": False},
+            kwargs={"host": "0.0.0.0", "port": port, "use_reloader": False, "debug": False},
             daemon=True
         )
         self._thread.start()

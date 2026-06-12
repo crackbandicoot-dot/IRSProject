@@ -4,13 +4,15 @@ from pymongo import MongoClient
 from contracts.indexed_document.indexed_document import IndexedDocument
 from shared.logger import get_logger
 logger = get_logger(__name__)
+import os
 class IndexRepository:
-    def __init__(self, connection_string: str = "mongodb://localhost:27017/",
-         db_name: str = "irs_db",collection_name:str="postings") -> None:
-        self.db_name=db_name
+    def __init__(self, connection_string: Optional[str] = None,
+         db_name: Optional[str] = None, collection_name: str = "postings") -> None:
+        self.db_name = db_name or os.getenv("MONGODB_DB", "irs_db")
         self.collection = collection_name
-        self._client = MongoClient(connection_string)
-        self._db = self._client[db_name]
+        conn_str = connection_string or os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
+        self._client = MongoClient(conn_str)
+        self._db = self._client[self.db_name]
         self._postings = self._db[collection_name]
 
     def create_index(self, index_data: list) -> None:

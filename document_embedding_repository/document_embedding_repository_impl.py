@@ -8,6 +8,7 @@ from contracts.search_results import SearchResult
 from contracts.errors import UnsupportedFeatureException
 from shared.id_generator import generate_document_uuid
 
+import os
 class DocumentEmbeddingRepository:
     # Qdrant supported distances mapped to our string identifiers
     SUPPORTED_METRICS = {
@@ -15,8 +16,10 @@ class DocumentEmbeddingRepository:
     }
 
     def __init__(
-        self, host: str = "localhost", port: int = 6333, collection_name: str = "document_embeddings"
+        self, host: Optional[str] = None, port: Optional[int] = None, collection_name: str = "document_embeddings"
     ) -> None:
+        host = host or os.getenv("QDRANT_HOST", "localhost")
+        port = port or int(os.getenv("QDRANT_PORT", 6333))
         self.client = QdrantClient(host=host, port=port)
         self.collection_name = collection_name
 
