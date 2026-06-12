@@ -53,7 +53,7 @@ def process_page(page: CrawledPage, saga_context: SagaContext) -> bool:
         document_embedding_repository.save(doc_id, doc_embedding).unwrap()
     return True 
         
-def run_pipeline(seed_urls: List[str], max_pages: int = 50) -> None:
+def run_pipeline(seed_urls: List[str], max_pages: int = 2500) -> None:
     _logger.info(f"Crawling pipeline started with {len(seed_urls)} seed URLs...")
     crawled_pages = web_crawler.crawl(seed_urls, max_pages).unwrap()
 
@@ -91,4 +91,4 @@ if __name__ == "__main__":
 
     seed_urls = sys.argv[1:] if len(sys.argv) > 1 else DEFAULT_SEED_URLS
 
-    run_pipeline(seed_urls, max_pages=2200)
+    run_pipeline(seed_urls, max_pages=2500)
