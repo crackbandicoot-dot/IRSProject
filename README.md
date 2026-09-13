@@ -39,7 +39,7 @@ This project is an Information Retrieval System that includes a web crawler, an 
 When you run the system for the first time, it will perform the following steps:
 1. Initialize the MongoDB and Qdrant databases.
 2. **Start the Crawler Pipeline:** The crawler is configured to fetch **2500 pages** by default.
-3. **Wait for Completion:** You will need to wait until the crawler finishes processing all pages before the web application becomes accessible. This process can take a significant amount of time depending on your network speed and the sites being crawled.
+3. **Wait for Completion:** You will need to wait until the crawler finishes processing all pages before the web application becomes accessible. This process can take a significant amount of time depending on your network and the seed set.
 
 The console will show "Crawler finished. Starting Web Application..." when it's ready.
 
@@ -65,3 +65,47 @@ The console will show "Crawler finished. Starting Web Application..." when it's 
 - **Qdrant**: Stores document embeddings for semantic search.
 - **Google Gemini**: Powers the RAG and query improvement features.
 - **Flask**: Serves the web interface.
+
+## Architecture — Modular Monolith
+
+This project is implemented as a modular monolith: a single deployable application that is organized internally as logically independent modules. The modular monolith approach was chosen to balance simplicity of deployment with clear separation of concerns.
+
+Key architectural elements:
+
+- Modules (logical boundaries):
+  - Crawler: Responsible for fetching pages, extracting raw text and metadata, and normalizing content before handing it to the indexing layer.
+  - Indexer / Inverted Index: Processes normalized documents to build and update the inverted index stored in MongoDB for fuzzy search.
+  - Embedding Service: Produces vector embeddings for documents and queries and persists them into Qdrant for semantic retrieval.
+  - RAG / Orchestrator: Coordinates retrieval (both fuzzy and semantic), constructs prompts, calls Google Gemini, and post-processes responses.
+  - Web GUI / API: Exposes HTTP endpoints for search, administration, and monitoring; renders the interactive frontend.
+  - Contracts / Shared Models: Contains data models and interfaces used by modules to ensure consistent data exchange.
+
+- Internal communication:
+  - Modules communicate through well-defined internal function interfaces and shared data stores rather than over the network. This keeps inter-module calls fast and straightforward while maintaining clear module ownership.
+  - Long-running or background work (e.g., crawling, embedding generation) is executed by worker processes/tasks within the same application process or as separate worker processes that share the repository code and contracts.
+
+- Data stores and responsibilities:
+  - MongoDB: Primary store for raw documents, preprocessed content, and the inverted index structures used by fuzzy search.
+  - Qdrant: Vector database that stores document embeddings and enables fast nearest-neighbor lookup for semantic search.
+  - External APIs: Google Gemini for language-model-powered query improvements and RAG generation.
+
+- Deployment model:
+  - Single deployable unit (Docker image) that contains the application and exposes the web GUI and worker entry points. Docker Compose is used for local development and for composing the app with MongoDB and Qdrant.
+  - The modular monolith makes local development, debugging, and CI simpler because you run one image and one codebase.
+
+- Why a modular monolith?
+  - Simpler deployment and testing: only one artifact to build, deploy, and run for development and small-scale production.
+  - Clear module boundaries: code is organized by feature/module with explicit contracts to keep coupling low.
+  - Easy to extract services later: if a module becomes a bottleneck, it can be refactored into its own service with minimal changes to interfaces.
+
+- Scalability and evolution:
+  - Scale vertically by allocating more CPU/memory to the monolith or by running multiple container instances behind a load balancer for the web/API surface.
+  - Offload heavy background tasks to separate worker processes or a message queue (e.g., RabbitMQ, Redis queues) if throughput requirements increase.
+  - If needed, individual modules (e.g., the crawler or embedding generator) can be split into microservices and communicate over HTTP or messaging while keeping the same contracts.
+
+- Operational notes:
+  - Use the Contracts folder to keep data models stable and versioned when evolving the system.
+  - Monitor background workers and queue lengths to detect processing bottlenecks.
+  - Keep the Qdrant index and MongoDB indexes documented so rebuilds can be automated.
+
+
