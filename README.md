@@ -109,3 +109,82 @@ Key architectural elements:
   - Keep the Qdrant index and MongoDB indexes documented so rebuilds can be automated.
 
 
+## Architecture Diagrams
+
+Below are two diagrams (component overview and a search/RAG sequence) rendered with Mermaid. GitHub renders Mermaid blocks in READMEs—if your viewer doesn't, you can use mermaid.live or export to an image.
+
+### Component Overview
+
+```mermaid
+flowchart TB
+  subgraph UserLayer
+    U[User]
+  end
+
+  subgraph Web
+    GUI[Web GUI / Frontend]
+    API[Backend API (Flask)]
+  end
+
+  subgraph Core[Application (Modular Monolith)]
+    Crawler[Crawler]
+    Indexer[Indexer / Inverted Index]
+    Embed[Embedding Service]
+    RAG[RAG Orchestrator]
+    Contracts[Contracts / Models]
+  end
+
+  subgraph Datastores
+    Mongo[(MongoDB\nInverted Index & Docs)]
+    Qdrant[(Qdrant\nEmbeddings)]
+    Gemini[(Google Gemini\nExternal LLM API)]
+  end
+
+  U --> GUI
+  GUI --> API
+  API --> RAG
+  API --> Indexer
+  API --> Embed
+  Crawler --> Indexer
+  Crawler --> Embed
+  Indexer --> Mongo
+  Embed --> Qdrant
+  RAG --> Gemini
+  RAG --> Mongo
+  RAG --> Qdrant
+  Contracts --> Crawler
+  Contracts --> Indexer
+  Contracts --> Embed
+  Contracts --> RAG
+
+  style Core fill:#f9f,stroke:#333,stroke-width:1px
+  style Datastores fill:#efe,stroke:#333,stroke-width:1px
+```
+
+### Search + RAG Sequence
+
+```mermaid
+sequenceDiagram
+  participant U as User
+  participant GUI as Web GUI
+  participant API as Backend API
+  participant F as Fuzzy Retrieval (Mongo)
+  participant S as Semantic Retrieval (Qdrant)
+  participant R as RAG Orchestrator
+  participant G as Google Gemini
+
+  U->>GUI: submit query
+  GUI->>API: POST /search
+  API->>F: fuzzy search (inverted index)
+  API->>S: semantic search (embeddings)
+  F-->>API: fuzzy results
+  S-->>API: semantic results
+  API->>R: combine & rank results
+  R->>G: build prompt + call Gemini
+  G-->>R: generated answer / supporting context
+  R-->>API: final response (RAG)
+  API-->>GUI: response
+  GUI-->>U: render search + answer
+```
+
+
